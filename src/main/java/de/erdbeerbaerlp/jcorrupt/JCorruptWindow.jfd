@@ -1,0 +1,163 @@
+JFDML JFormDesigner: "7.0.0.6.255" Java: "11.0.4" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+			name: "this"
+			"title": "JCorrupt"
+			addEvent( new FormEvent( "java.awt.event.WindowListener", "windowClosing", "thisWindowClosing", true ) )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "sourceFileField"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 10
+				"y": 45
+				"width": 250
+				"height": 30
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "buttonSrcFile"
+				"text": "Browse..."
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button1ActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 260
+				"y": 45
+				"width": 120
+				"height": 30
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label1"
+				"text": "File to Corrupt:"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 15
+				"y": 25
+				"width": 200
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "destFileField"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 250
+				"height": 30
+				"x": 10
+				"y": 105
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "buttonDestFile"
+				"text": "Browse..."
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonDestFileActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 120
+				"height": 30
+				"x": 260
+				"y": 105
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label2"
+				"text": "Corrupted file location"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 200
+				"height": 16
+				"x": 15
+				"y": 85
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "buttonStart"
+				"text": "Start Corruption"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonStartActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 220
+				"y": 255
+			} )
+			add( new FormComponent( "javax.swing.JTextField" ) {
+				name: "emulatorField"
+				addEvent( new FormEvent( "java.awt.event.KeyListener", "keyReleased", "emulatorFieldKeyReleased", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 250
+				"height": 30
+				"x": 10
+				"y": 190
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "buttonEmu"
+				"text": "Browse..."
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonEmuActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 120
+				"height": 30
+				"x": 260
+				"y": 190
+			} )
+			add( new FormComponent( "javax.swing.JCheckBox" ) {
+				name: "startEmulatorBox"
+				"text": "Launch emulator after corruption"
+				addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "checkBox1StateChanged", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 20
+				"y": 165
+			} )
+			add( new FormComponent( "javax.swing.JProgressBar" ) {
+				name: "progressBar1"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 40
+				"y": 285
+				"width": 490
+				"height": 20
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "label3"
+				"text": "0/0 bytes corrupted"
+				"horizontalAlignment": 0
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 40
+				"y": 305
+				"width": 490
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "configButton"
+				"text": "Config"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "configButtonActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 390
+				"y": 255
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "lblRam"
+				"text": "RAM: ?/?"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 395
+				"y": 15
+				"width": 165
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "lblCPU"
+				"text": "CPU: ?%"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 165
+				"height": 16
+				"x": 395
+				"y": 40
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "lblHDD"
+				"text": "HDD: ?/?"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"width": 165
+				"height": 16
+				"x": 395
+				"y": 65
+			} )
+			add( new FormComponent( "javax.swing.JButton" ) {
+				name: "btnGenerateLocation"
+				"text": "Generate"
+				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "btnGenerateLocationActionPerformed", true ) )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 385
+				"y": 105
+				"height": 30
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 5, 0 )
+			"size": new java.awt.Dimension( 580, 370 )
+		} )
+	}
+}
