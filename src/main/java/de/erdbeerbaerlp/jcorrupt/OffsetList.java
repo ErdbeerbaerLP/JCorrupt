@@ -14,9 +14,12 @@ import java.util.ArrayList;
 public class OffsetList extends ArrayList<OffsetList.ProtectedOffsetArea>
 {
     
+    public static final OffsetList EMPTY = new OffsetList();
     private static final Gson g = new GsonBuilder().create();
-    private static final File jsonFile = new File("D:\\ProtectedFileAreas.json");
+    static final File jsonFile = new File(defaultDirectory() + "/JCorrupt/ProtectedFileAreas.json");
     
+    private OffsetList() {
+    }
     public OffsetList(final String extension, final long fileLength) throws FileNotFoundException {
         System.out.println(extension);
         final JsonObject o = g.fromJson(new FileReader(jsonFile), JsonObject.class);
@@ -31,6 +34,14 @@ public class OffsetList extends ArrayList<OffsetList.ProtectedOffsetArea>
                 }
             }
         }
+    }
+    
+    private static String defaultDirectory() {
+        String OS = System.getProperty("os.name").toUpperCase();
+        if (OS.contains("WIN")) return System.getenv("APPDATA");
+        else if (OS.contains("MAC")) return System.getProperty("user.home") + "/Library/Application " + "Support";
+        else if (OS.contains("NUX")) return System.getProperty("user.home");
+        return System.getProperty("user.dir");
     }
     
     private static long convertByteString(final String str, final long fileLength) {

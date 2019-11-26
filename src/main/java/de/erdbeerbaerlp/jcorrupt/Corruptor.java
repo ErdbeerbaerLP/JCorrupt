@@ -13,7 +13,7 @@ public class Corruptor implements AutoCloseable
     final String extension;
     final FileInputStream is;
     final FileOutputStream os;
-    private final OffsetList ol;
+    private OffsetList ol;
     byte[] buffer = new byte[4096];
     private long currentOffset = 0;
     private ArrayList<Thread> threadPool = new ArrayList<>();
@@ -23,8 +23,13 @@ public class Corruptor implements AutoCloseable
         this.destination = new File(dest);
         this.length = source.length();
         this.extension = JCorruptWindow.getFileExtension(source);
-        ol = new OffsetList(extension, length);
-        System.out.println(ol.toString());
+        try {
+            ol = new OffsetList(extension, length);
+            System.out.println(ol.toString());
+        } catch (FileNotFoundException e) {
+            ol = OffsetList.EMPTY;
+            e.printStackTrace();
+        }
         if (this.source.getAbsolutePath().equals(this.destination.getAbsolutePath())) throw new FileAlreadyExistsException(dest);
         is = new FileInputStream(source);
         os = new FileOutputStream(destination);
