@@ -9,7 +9,9 @@ import com.sun.management.OperatingSystemMXBean;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
@@ -24,9 +26,18 @@ public class JCorruptWindow extends JFrame
     
     final Thread usageThread;
     final ConfigDialog cfg = new ConfigDialog(this);
+    //HDD Stuff
+    
+    
+    long usableHDD = -1;
+    long maxHDD = -1;
+    long usedHDD = -1;
+    long neededSize = -1;
+    
+    //------
     public JCorruptWindow() {
         initComponents();
-        setSize(605, 400);
+        setSize(615, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         
         emulatorField.setEnabled(false);
@@ -38,22 +49,24 @@ public class JCorruptWindow extends JFrame
                 long usedMem = runtime.totalMemory() - runtime.freeMemory();
                 
                 
-                lblRam.setText("RAM: " + formatStorage(usedMem) + "/" + formatStorage(maxMemory));
+                lblRam.setText("RAM: " + formatStorage(usedMem) + " / " + formatStorage(maxMemory));
                 final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
                 lblCPU.setText("CPU: " + Math.round(osBean.getSystemCpuLoad() * 100) + "%");
                 
                 
-                long usableHDD = -1;
-                long maxHDD = -1;
                 if (isValidPath(destFileField.getText())) {
                     final Path p = Paths.get(destFileField.getText()).getRoot();
                     if (p != null) {
                         final File destFile = new File(p.toString());
                         maxHDD = destFile.getTotalSpace();
                         usableHDD = destFile.getUsableSpace();
+                        if (maxHDD < usableHDD) usedHDD = maxHDD;
+                        else usedHDD = maxHDD - usableHDD;
+                        neededSize = new File(sourceFileField.getText()).length();
                     }
                 }
-                lblHDD.setText("HDD" + "" + "" + "" + "" + "" + "" + ": " + (isValidPath(destFileField.getText()) ? (formatStorage(usableHDD) + "/" + formatStorage(maxHDD)) : "?/?"));
+                lblHDD.setText("<html>" + (neededSize > usableHDD ? "<font color='red'>" : "") + "HDD" + ": " + (isValidPath(destFileField.getText()) ? (formatStorage(usedHDD) + " / " + formatStorage(
+                        maxHDD)) + " Used</html>" : "?/?</html>"));
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException ignored) {
@@ -107,7 +120,6 @@ public class JCorruptWindow extends JFrame
         generateDest();
     }
     
-    private JLabel lockIcon;
     private void checkBox1StateChanged(ChangeEvent e) {
         final JCheckBox box = (JCheckBox) e.getSource();
         emulatorField.setEnabled(box.isSelected());
@@ -154,7 +166,10 @@ public class JCorruptWindow extends JFrame
         }
         try {
             final Corruptor c = new Corruptor(sourceFileField.getText(), destFileField.getText());
-        
+            if (usableHDD > -1 && c.length >= usableHDD) {
+                showErrorMessage("Not enough Space!", "The target drive has not enough space! Choose a different drive or clean it up.");
+                return;
+            }
             this.setEnabled(false);
             final Thread t = new Thread(() -> {
                 c.startRandomByteCorruption();
@@ -223,10 +238,6 @@ public class JCorruptWindow extends JFrame
         
     }
     
-    private void emulatorFieldKeyReleased(KeyEvent e) {
-        // TODO add your code here
-    }
-    
     private void generateDest() {
         if (!sourceFileField.getText().isEmpty()) {
             final File srcFile = new File(sourceFileField.getText());
@@ -254,7 +265,8 @@ public class JCorruptWindow extends JFrame
     private JLabel lblCPU;
     private JLabel lblHDD;
     private JButton btnGenerateLocation;
-
+    
+    // JFormDesigner - End of variables declaration  //GEN-END:variables
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
@@ -275,7 +287,6 @@ public class JCorruptWindow extends JFrame
         this.lblCPU = new JLabel();
         this.lblHDD = new JLabel();
         this.btnGenerateLocation = new JButton();
-        this.lockIcon = new JLabel();
 
         //======== this ========
         setTitle("JCorrupt");
@@ -334,12 +345,6 @@ public class JCorruptWindow extends JFrame
 
         //---- emulatorField ----
         this.emulatorField.setName("emulatorField");
-        this.emulatorField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                emulatorFieldKeyReleased(e);
-            }
-        });
         contentPane.add(this.emulatorField);
         this.emulatorField.setBounds(10, 190, 250, 30);
 
@@ -360,14 +365,14 @@ public class JCorruptWindow extends JFrame
         //---- progressBar1 ----
         this.progressBar1.setName("progressBar1");
         contentPane.add(this.progressBar1);
-        this.progressBar1.setBounds(40, 285, 490, 20);
+        this.progressBar1.setBounds(40, 285, 540, 20);
 
         //---- label3 ----
         this.label3.setText("0/0 bytes corrupted");
         this.label3.setHorizontalAlignment(SwingConstants.CENTER);
         this.label3.setName("label3");
         contentPane.add(this.label3);
-        this.label3.setBounds(40, 305, 490, this.label3.getPreferredSize().height);
+        this.label3.setBounds(40, 305, 540, this.label3.getPreferredSize().height);
 
         //---- configButton ----
         this.configButton.setText("Config");
@@ -392,7 +397,7 @@ public class JCorruptWindow extends JFrame
         this.lblHDD.setText("HDD: ?/?");
         this.lblHDD.setName("lblHDD");
         contentPane.add(this.lblHDD);
-        this.lblHDD.setBounds(395, 65, 165, 16);
+        this.lblHDD.setBounds(395, 65, 215, 16);
 
         //---- btnGenerateLocation ----
         this.btnGenerateLocation.setText("Generate");
@@ -400,11 +405,6 @@ public class JCorruptWindow extends JFrame
         this.btnGenerateLocation.addActionListener(e -> btnGenerateLocationActionPerformed(e));
         contentPane.add(this.btnGenerateLocation);
         this.btnGenerateLocation.setBounds(385, 105, this.btnGenerateLocation.getPreferredSize().width, 29);
-    
-        //---- lockIcon ----
-        this.lockIcon.setName("lockIcon");
-        contentPane.add(this.lockIcon);
-        this.lockIcon.setBounds(335, 255, 35, 25);
 
         {
             // compute preferred size
@@ -424,5 +424,4 @@ public class JCorruptWindow extends JFrame
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
-    // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
