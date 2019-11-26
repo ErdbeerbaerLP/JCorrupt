@@ -50,8 +50,8 @@ new FormModel {
 			} )
 			add( new FormComponent( "javax.swing.JCheckBox" ) {
 				name: "checkBox1"
-				"text": "Prevent overwriting important stuff (like headers)"
-				"enabled": false
+				"text": "Prevent overwriting important stuff (like headers / footers)"
+				"selected": true
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 50
 				"y": 155

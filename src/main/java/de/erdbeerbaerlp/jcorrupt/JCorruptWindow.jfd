@@ -23,7 +23,7 @@ new FormModel {
 				"x": 260
 				"y": 45
 				"width": 120
-				"height": 30
+				"height": 29
 			} )
 			add( new FormComponent( "javax.swing.JLabel" ) {
 				name: "label1"
@@ -47,7 +47,7 @@ new FormModel {
 				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonDestFileActionPerformed", true ) )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"width": 120
-				"height": 30
+				"height": 29
 				"x": 260
 				"y": 105
 			} )
@@ -65,7 +65,7 @@ new FormModel {
 				"text": "Start Corruption"
 				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonStartActionPerformed", true ) )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
-				"x": 220
+				"x": 205
 				"y": 255
 			} )
 			add( new FormComponent( "javax.swing.JTextField" ) {
@@ -83,13 +83,13 @@ new FormModel {
 				addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "buttonEmuActionPerformed", true ) )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"width": 120
-				"height": 30
+				"height": 29
 				"x": 260
 				"y": 190
 			} )
 			add( new FormComponent( "javax.swing.JCheckBox" ) {
 				name: "startEmulatorBox"
-				"text": "Launch emulator after corruption"
+				"text": "Launch emulator/program after corruption (works with cmd commands)"
 				addEvent( new FormEvent( "javax.swing.event.ChangeListener", "stateChanged", "checkBox1StateChanged", true ) )
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 20
@@ -153,7 +153,15 @@ new FormModel {
 			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
 				"x": 385
 				"y": 105
-				"height": 30
+				"height": 29
+			} )
+			add( new FormComponent( "javax.swing.JLabel" ) {
+				name: "lockIcon"
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 335
+				"y": 255
+				"height": 25
+				"width": 35
 			} )
 		}, new FormLayoutConstraints( null ) {
 			"location": new java.awt.Point( 5, 0 )

@@ -20,13 +20,14 @@ public class ConfigDialog extends JDialog {
         initComponents();
         this.setSize(455, 320);
     }
-
+    
     private void saveBtnActionPerformed(ActionEvent e) {
         try {
             spinner1.commitEdit();
         } catch (ParseException ignored) {
         }
         Conf.rate = (int) spinner1.getValue();
+        Conf.protectHeaders = checkBox1.isSelected();
         this.setVisible(false);
     }
     
@@ -34,6 +35,7 @@ public class ConfigDialog extends JDialog {
     public void setVisible(boolean b) {
         if(b){
             spinner1.setValue(Conf.rate);
+            checkBox1.setSelected(Conf.protectHeaders);
         }
         super.setVisible(b);
     }
@@ -97,8 +99,8 @@ public class ConfigDialog extends JDialog {
         this.spinner1.setBounds(190, 80, 75, this.spinner1.getPreferredSize().height);
 
         //---- checkBox1 ----
-        this.checkBox1.setText("Prevent overwriting important stuff (like headers)");
-        this.checkBox1.setEnabled(false);
+        this.checkBox1.setText("Prevent overwriting important stuff (like headers / footers)");
+        this.checkBox1.setSelected(true);
         this.checkBox1.setName("checkBox1");
         contentPane.add(this.checkBox1);
         this.checkBox1.setBounds(new Rectangle(new Point(50, 155), this.checkBox1.getPreferredSize()));

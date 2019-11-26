@@ -10,12 +10,13 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.regex.Pattern;
 
 
@@ -110,6 +111,7 @@ public class JCorruptWindow extends JFrame
         generateDest();
     }
     
+    private JLabel lockIcon;
     private void checkBox1StateChanged(ChangeEvent e) {
         final JCheckBox box = (JCheckBox) e.getSource();
         emulatorField.setEnabled(box.isSelected());
@@ -137,68 +139,66 @@ public class JCorruptWindow extends JFrame
         this.toFront(); //For some reason the window minimizes when pressing OK
     }
     
+    public static String getFileExtension(File path) {
+        String extension = "";
+        
+        int i = path.getAbsolutePath().lastIndexOf('.');
+        int p = Math.max(path.getAbsolutePath().lastIndexOf('/'), path.getAbsolutePath().lastIndexOf('\\'));
+        
+        if (i > p) {
+            extension = path.getAbsolutePath().substring(i + 1);
+        }
+        return extension;
+    }
+
     private void buttonStartActionPerformed(ActionEvent ev) {
         if (sourceFileField.getText().isEmpty()) {
             showErrorMessage("Error", "Can not corrupt nothing...");
             return;
         }
-        final Corruptor c = new Corruptor(sourceFileField.getText());
-        if (!c.fileExists()) {
-            showErrorMessage("Missing File", "Can not find the source file");
-            return;
-        }
-        this.setEnabled(false);
-        final Thread t = new Thread(() -> {
-            if(c.isLargeFile()) {
-                System.out.println("Mega large file... splitting execution");
+        try {
+            final Corruptor c = new Corruptor(sourceFileField.getText(), destFileField.getText());
+        
+            this.setEnabled(false);
+            final Thread t = new Thread(() -> {
+                c.startRandomByteCorruption();
                 try {
-                    final File source = new File(sourceFileField.getText());
-                    final FileOutputStream os = new FileOutputStream(new File(destFileField.getText()));
-                    final FileInputStream is = new FileInputStream(source);
-                    long fileSize = source.length();
-                    while(fileSize > 0){
-                        final long loaded = c.advancedFileLoad(is);
-                        System.out.println(loaded);
-                        if(loaded == -1) return;
-                        c.startRandomByteCorruption();
-                        c.advancedSaveToFile(os);
-                        fileSize = fileSize - loaded;
-                    }
-                    os.close();
-                } catch (IOException e) {
+                    c.close();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                
-            }else{
-                c.startRandomByteCorruption();
-                c.saveToFile(destFileField.getText());
-            }
-            Runtime.getRuntime().gc();
-            if (startEmulatorBox.isSelected()) try {
-                final Process p = Runtime.getRuntime().exec(emulatorField.getText().replace("%file%", "\"" + destFileField.getText() + "\""));
-                p.waitFor();
-                progressBar1.setValue(0);
-                progressBar1.setMaximum(1);
-                this.requestFocus();
-                this.toFront();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            this.setEnabled(true);
-        });
-        t.setName("Corruptor Thread");
-        t.setDaemon(true);
-        t.start();
+                Runtime.getRuntime().gc();
+                if (startEmulatorBox.isSelected()) try {
+                    final Process p = Runtime.getRuntime().exec(emulatorField.getText().replace("%file%", "\"" + destFileField.getText() + "\""));
+                    p.waitFor();
+                    progressBar1.setValue(0);
+                    progressBar1.setMaximum(1);
+                    this.requestFocus();
+                    this.toFront();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            
+                this.setEnabled(true);
+            
+            });
+            t.setName("Corruptor Thread");
+            t.setDaemon(true);
+            t.start();
+        } catch (FileNotFoundException e) {
+            showErrorMessage("Missing File", "Can not find the source file");
+        } catch (FileAlreadyExistsException e) {
+            showErrorMessage("Src = Dst", "Source and destination are the same");
+        }
     }
     
-    public void setCorruptedStatus(int current, int max, String prefix) {
-        progressBar1.setValue(current);
-        progressBar1.setMaximum(max);
+    public void setCorruptedStatus(long current, long max, String prefix) {
+        setCorruptedStatus((int) (((double) current / (double) max) * 1000000));
         if (max == -1) {
             label3.setText(prefix);
         }
         else {
-            label3.setText(prefix + " " + current + "/" + max + " bytes corrupted");
+            label3.setText(prefix + " " + formatStorage(current) + "/" + formatStorage(max) + "  corrupted");
         }
     }
     
@@ -214,21 +214,47 @@ public class JCorruptWindow extends JFrame
         generateDest();
     }
     
+    private void setCorruptedStatus(int current) {
+        progressBar1.setValue(current);
+        progressBar1.setMaximum(1000000);
+        
+    }
+    
+    private void emulatorFieldKeyReleased(KeyEvent e) {
+        // TODO add your code here
+    }
+    
     private void generateDest() {
         if (!sourceFileField.getText().isEmpty()) {
             final File srcFile = new File(sourceFileField.getText());
             if (!srcFile.exists()) return;
             final String[] dots = sourceFileField.getText().split(Pattern.quote("."));
             System.out.println(sourceFileField.getText());
-            System.out.println(Arrays.toString(dots));
-            destFileField.setText(srcFile.getParentFile().getAbsolutePath() + "Corrupted" + (dots.length > 1?("."+dots[dots.length - 1]):""));
+            final String ending = (dots.length > 1 ? ("." + dots[dots.length - 1]) : "");
+            destFileField.setText(srcFile.getParentFile().getAbsolutePath() + File.separator + srcFile.getName().replace(ending, "") + ".corrupted" + ending);
         }
     }
-
-    private void emulatorFieldKeyReleased(KeyEvent e) {
-        // TODO add your code here
-    }
     
+    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+    // Generated using JFormDesigner Evaluation license - unknown
+    private JTextField sourceFileField;
+    private JButton buttonSrcFile;
+    private JLabel label1;
+    private JTextField destFileField;
+    private JButton buttonDestFile;
+    private JLabel label2;
+    private JButton buttonStart;
+    private JTextField emulatorField;
+    private JButton buttonEmu;
+    private JCheckBox startEmulatorBox;
+    private JProgressBar progressBar1;
+    private JLabel label3;
+    private JButton configButton;
+    private JLabel lblRam;
+    private JLabel lblCPU;
+    private JLabel lblHDD;
+    private JButton btnGenerateLocation;
+
     private void initComponents() {
         // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
         // Generated using JFormDesigner Evaluation license - unknown
@@ -249,6 +275,7 @@ public class JCorruptWindow extends JFrame
         this.lblCPU = new JLabel();
         this.lblHDD = new JLabel();
         this.btnGenerateLocation = new JButton();
+        this.lockIcon = new JLabel();
 
         //======== this ========
         setTitle("JCorrupt");
@@ -272,7 +299,7 @@ public class JCorruptWindow extends JFrame
         this.buttonSrcFile.setName("buttonSrcFile");
         this.buttonSrcFile.addActionListener(e -> button1ActionPerformed(e));
         contentPane.add(this.buttonSrcFile);
-        this.buttonSrcFile.setBounds(260, 45, 120, 30);
+        this.buttonSrcFile.setBounds(260, 45, 120, 29);
 
         //---- label1 ----
         this.label1.setText("File to Corrupt:");
@@ -290,7 +317,7 @@ public class JCorruptWindow extends JFrame
         this.buttonDestFile.setName("buttonDestFile");
         this.buttonDestFile.addActionListener(e -> buttonDestFileActionPerformed(e));
         contentPane.add(this.buttonDestFile);
-        this.buttonDestFile.setBounds(260, 105, 120, 30);
+        this.buttonDestFile.setBounds(260, 105, 120, 29);
 
         //---- label2 ----
         this.label2.setText("Corrupted file location");
@@ -303,7 +330,7 @@ public class JCorruptWindow extends JFrame
         this.buttonStart.setName("buttonStart");
         this.buttonStart.addActionListener(e -> buttonStartActionPerformed(e));
         contentPane.add(this.buttonStart);
-        this.buttonStart.setBounds(new Rectangle(new Point(220, 255), this.buttonStart.getPreferredSize()));
+        this.buttonStart.setBounds(new Rectangle(new Point(205, 255), this.buttonStart.getPreferredSize()));
 
         //---- emulatorField ----
         this.emulatorField.setName("emulatorField");
@@ -321,10 +348,10 @@ public class JCorruptWindow extends JFrame
         this.buttonEmu.setName("buttonEmu");
         this.buttonEmu.addActionListener(e -> buttonEmuActionPerformed(e));
         contentPane.add(this.buttonEmu);
-        this.buttonEmu.setBounds(260, 190, 120, 30);
+        this.buttonEmu.setBounds(260, 190, 120, 29);
 
         //---- startEmulatorBox ----
-        this.startEmulatorBox.setText("Launch emulator after corruption");
+        this.startEmulatorBox.setText("Launch emulator/program after corruption (works with cmd commands)");
         this.startEmulatorBox.setName("startEmulatorBox");
         this.startEmulatorBox.addChangeListener(e -> checkBox1StateChanged(e));
         contentPane.add(this.startEmulatorBox);
@@ -372,7 +399,12 @@ public class JCorruptWindow extends JFrame
         this.btnGenerateLocation.setName("btnGenerateLocation");
         this.btnGenerateLocation.addActionListener(e -> btnGenerateLocationActionPerformed(e));
         contentPane.add(this.btnGenerateLocation);
-        this.btnGenerateLocation.setBounds(385, 105, this.btnGenerateLocation.getPreferredSize().width, 30);
+        this.btnGenerateLocation.setBounds(385, 105, this.btnGenerateLocation.getPreferredSize().width, 29);
+    
+        //---- lockIcon ----
+        this.lockIcon.setName("lockIcon");
+        contentPane.add(this.lockIcon);
+        this.lockIcon.setBounds(335, 255, 35, 25);
 
         {
             // compute preferred size
@@ -392,25 +424,5 @@ public class JCorruptWindow extends JFrame
         setLocationRelativeTo(getOwner());
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
-    
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner Evaluation license - unknown
-    private JTextField sourceFileField;
-    private JButton buttonSrcFile;
-    private JLabel label1;
-    private JTextField destFileField;
-    private JButton buttonDestFile;
-    private JLabel label2;
-    private JButton buttonStart;
-    private JTextField emulatorField;
-    private JButton buttonEmu;
-    private JCheckBox startEmulatorBox;
-    private JProgressBar progressBar1;
-    private JLabel label3;
-    private JButton configButton;
-    private JLabel lblRam;
-    private JLabel lblCPU;
-    private JLabel lblHDD;
-    private JButton btnGenerateLocation;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
