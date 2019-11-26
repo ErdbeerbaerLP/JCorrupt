@@ -1,6 +1,7 @@
 package de.erdbeerbaerlp.jcorrupt;
 
 import java.io.*;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -18,9 +19,11 @@ public class Corruptor implements AutoCloseable
     private long currentOffset = 0;
     private ArrayList<Thread> threadPool = new ArrayList<>();
     
-    Corruptor(String src, String dest) throws FileNotFoundException, FileAlreadyExistsException {
+    Corruptor(String src, String dest) throws FileNotFoundException, FileAlreadyExistsException, AccessDeniedException {
         this.source = new File(src);
+        if (!this.source.canRead()) throw new AccessDeniedException(source.getAbsolutePath());
         this.destination = new File(dest);
+        if (!this.destination.canWrite()) throw new AccessDeniedException(destination.getAbsolutePath());
         this.length = source.length();
         this.extension = JCorruptWindow.getFileExtension(source);
         try {
@@ -28,7 +31,6 @@ public class Corruptor implements AutoCloseable
             System.out.println(ol.toString());
         } catch (FileNotFoundException e) {
             ol = OffsetList.EMPTY;
-            e.printStackTrace();
         }
         if (this.source.getAbsolutePath().equals(this.destination.getAbsolutePath())) throw new FileAlreadyExistsException(dest);
         is = new FileInputStream(source);

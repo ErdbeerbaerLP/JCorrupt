@@ -13,11 +13,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.management.ManagementFactory;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.regex.Pattern;
+import java.nio.file.*;
 
 
 /**
@@ -189,6 +185,13 @@ public class JCorruptWindow extends JFrame
             showErrorMessage("Missing File", "Can not find the source file");
         } catch (FileAlreadyExistsException e) {
             showErrorMessage("Src = Dst", "Source and destination are the same");
+        } catch (AccessDeniedException e) {
+            if (e.getFile().equals(new File(destFileField.getText()).getAbsolutePath())) {
+                showErrorMessage("Write Error!", "Can not write to Destination!");
+            }
+            else {
+                showErrorMessage("Read Error!", "Can not read from Source!");
+            }
         }
     }
     
@@ -228,10 +231,7 @@ public class JCorruptWindow extends JFrame
         if (!sourceFileField.getText().isEmpty()) {
             final File srcFile = new File(sourceFileField.getText());
             if (!srcFile.exists()) return;
-            final String[] dots = sourceFileField.getText().split(Pattern.quote("."));
-            System.out.println(sourceFileField.getText());
-            final String ending = (dots.length > 1 ? ("." + dots[dots.length - 1]) : "");
-            destFileField.setText(srcFile.getParentFile().getAbsolutePath() + File.separator + srcFile.getName().replace(ending, "") + ".corrupted" + ending);
+            destFileField.setText(srcFile.getParentFile().getAbsolutePath() + File.separator + srcFile.getName().replace("." + getFileExtension(srcFile), "") + ".corrupted." + getFileExtension(srcFile));
         }
     }
     
